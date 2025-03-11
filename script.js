@@ -22,7 +22,7 @@ const phrases = [
     "Um senhor a discutir com o motorista de autocarro", 
     "Um empregado de restaurante a ajustar as cadeiras do terraço", 
     "Um casal a discutir em voz alta no meio da rua", 
-    "Um carteiro a distribuir cartas", 
+    "Uma pessoa que requer ajuda do Fernando", 
     "Um artista de rua a fazer estátua humana", 
     "Um vendedor de rua a vender óculos de sol falsificados", 
     "Um jovem a andar com uma mala de viagem pequena", 
