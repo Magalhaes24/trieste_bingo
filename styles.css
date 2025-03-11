@@ -1,0 +1,121 @@
+/* General Styles */
+body {
+    font-family: 'Arial', sans-serif;
+    text-align: center;
+    background-color: #f0f0f5;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+/* Bingo Card Container */
+.bingo-container {
+    width: min(95vw, 400px);
+    height: min(90vh, 700px);
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5vh;
+}
+
+/* Bingo Header */
+.bingo-header {
+    display: flex;
+    justify-content: space-around;
+    font-size: clamp(1.5rem, 5vw, 2.5rem);
+    font-weight: bold;
+    background: linear-gradient(45deg, #ff4b4b, #ff7373);
+    color: white;
+    padding: 1.2vh;
+    border-radius: 10px;
+    width: 100%;
+    letter-spacing: 5px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.15);
+}
+
+/* Bingo Card Grid */
+.bingo-card {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: repeat(6, 1fr);
+    gap: 6px;
+    padding: 1.5vh;
+    width: 100%;
+    flex-grow: 1;
+}
+
+/* Bingo Cells */
+.bingo-cell {
+    background: white;
+    border: 2px solid #ddd;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+    text-align: center;
+    border-radius: 8px;
+    position: relative;
+    height: min(10vh, 70px); /* Increased height for multi-line text */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.05);
+    transition: background-color 0.2s, transform 0.1s;
+    padding: 4px;
+    overflow: hidden;
+    word-wrap: break-word;
+    white-space: normal; /* Allows multi-line text */
+    text-align: center;
+    display: flex;
+}
+
+/* Hover & Tap Effects */
+.bingo-cell:hover {
+    background: #f8f9fa;
+}
+
+.bingo-cell:active {
+    transform: scale(0.97);
+}
+
+/* Marked Cell */
+.marked {
+    background: white;
+    position: relative;
+}
+
+.marked::after {
+    content: "✖";
+    color: #ff4b4b;
+    font-size: clamp(1.5rem, 4vw, 2.5rem);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-weight: bold;
+}
+
+/* Fully Responsive Design */
+@media screen and (max-width: 600px) {
+    .bingo-container {
+        width: 95vw;
+        height: 90vh;
+    }
+    .bingo-cell {
+        font-size: 14px;
+        height: min(12vh, 75px);
+    }
+}
+
+@media screen and (min-width: 1200px) {
+    .bingo-container {
+        max-width: 450px;
+        max-height: 750px;
+    }
+}
