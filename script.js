@@ -62,7 +62,7 @@ const phrases = [
   const saveOrder = (order) => localStorage.setItem(KEY, JSON.stringify(order));
   
   /* ------------------ Text-fit utility ------------------ */
-  function fitText(cell, { max = 18, min = 9 } = {}) {
+  function fitText(cell, { max = 18, min = 8 } = {}) {
     let size = max;
     cell.style.fontSize = size + "px";
   
