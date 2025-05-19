@@ -1,4 +1,6 @@
-/* ------------------ Phrase list ------------------ */
+/* ------------------------------------------------- */
+/*  48 Bingo phrases                                 */
+/* ------------------------------------------------- */
 const phrases = [
     "Um senhor idoso a ler jornal num banco de praça",
     "Um ciclista a atravessar uma passadeira sem desmontar",
@@ -46,62 +48,114 @@ const phrases = [
     "Uma pessoa a pescar",
     "Um turista a tentar tirar foto a uma gaivota",
     "Alguém com uma mala enorme a procurar o hostel",
-    "Sítio que o Fausto diria que fumava uma",
-    "Espaço já visitado pelas manas do daily"
   ];
   
-  /* ------------------ Save / load helpers ------------------ */
-  const KEY = "bingoCardOrder";
-  const loadOrder = () => {
-    try {
-      const data = JSON.parse(localStorage.getItem(KEY));
-      if (Array.isArray(data) && data.length === 30) return data;
-    } catch {}
-    return null;
-  };
-  const saveOrder = (order) => localStorage.setItem(KEY, JSON.stringify(order));
+  /* ------------------------------------------------- */
+  /*  Local-storage helpers                            */
+  /* ------------------------------------------------- */
+  const STORAGE_KEY = "bingoCardState";          // one key for everything
+  const ROWS = 6, COLS = 5, CELLS = 30;
   
-  /* ------------------ Text-fit utility ------------------ */
-  function fitText(cell, { max = 18, min = 8 } = {}) {
+  function loadState() {
+    try {
+      const data = JSON.parse(localStorage.getItem(STORAGE_KEY));
+  
+      /* Back-compat for the very first versions that only saved order */
+      if (Array.isArray(data) && data.length === CELLS) {
+        return {
+          order: data,
+          marks: Array(CELLS).fill(false),
+          rowDone: Array(ROWS).fill(false),
+          colDone: Array(COLS).fill(false)
+        };
+      }
+  
+      if (
+        data &&
+        Array.isArray(data.order) && data.order.length === CELLS &&
+        Array.isArray(data.marks) && data.marks.length === CELLS &&
+        Array.isArray(data.rowDone) && data.rowDone.length === ROWS &&
+        Array.isArray(data.colDone) && data.colDone.length === COLS
+      ) {
+        return data;
+      }
+    } catch { /** ignore parse errors **/ }
+  
+    return null;
+  }
+  
+  function saveState(state) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }
+  
+  /* ------------------------------------------------- */
+  /*  Utility: shrink text until it fits               */
+  /* ------------------------------------------------- */
+  function fitText(cell, { max = 18, min = 9 } = {}) {
     let size = max;
     cell.style.fontSize = size + "px";
   
-    /* shrink until it fits */
     while (
       size > min &&
       (cell.scrollHeight > cell.clientHeight ||
        cell.scrollWidth  > cell.clientWidth)
     ) cell.style.fontSize = --size + "px";
   
-    /* nudge back up if possible */
     while (
       size < max &&
       cell.scrollHeight <= cell.clientHeight &&
       cell.scrollWidth  <= cell.clientWidth
     ) cell.style.fontSize = ++size + "px";
   
-    /* correct any overshoot */
     if (
       cell.scrollHeight > cell.clientHeight ||
       cell.scrollWidth  > cell.clientWidth
     ) cell.style.fontSize = --size + "px";
   }
   
-  /* ------------------ Build grid ------------------ */
-  function build(order) {
+  /* ------------------------------------------------- */
+  /*  Confetti helpers (row / col completion)          */
+  /* ------------------------------------------------- */
+  function celebrate() {
+    if (typeof confetti === "function") {
+      confetti({
+        particleCount: 120,
+        spread: 90,
+        origin: { y: 0.6 }
+      });
+    }
+  }
+  
+  /* ------------------------------------------------- */
+  /*  Build the grid                                   */
+  /* ------------------------------------------------- */
+  function build(state) {
+    const { order, marks } = state;
     const grid = document.getElementById("bingoCard");
     grid.innerHTML = "";
   
-    order.forEach((txt, i) => {
+    order.forEach((txt, idx) => {
+      const row = Math.floor(idx / COLS);
+      const col = idx % COLS;
+  
       const cell = Object.assign(document.createElement("div"), {
         className: "bingo-cell",
         textContent: txt,
-        style: `animation-delay:${i * 40}ms`
+        style: `animation-delay:${idx * 40}ms`
       });
-      cell.addEventListener("click", () => cell.classList.toggle("marked"));
+  
+      cell.dataset.index = idx;
+      cell.dataset.row = row;
+      cell.dataset.col = col;
+  
+      if (marks[idx]) cell.classList.add("marked");
+  
+      cell.addEventListener("click", () => toggleMark(cell, state));
+  
       grid.appendChild(cell);
     });
   
+    /* two frames → layout stable → fit */
     requestAnimationFrame(() =>
       requestAnimationFrame(() =>
         document.querySelectorAll(".bingo-cell").forEach(fitText)
@@ -109,24 +163,69 @@ const phrases = [
     );
   }
   
-  /* ------------------ Fresh shuffle ------------------ */
-  function shuffleCard() {
-    const fresh = [...phrases].sort(() => Math.random() - 0.5).slice(0, 30);
-    saveOrder(fresh);
-    build(fresh);
+  /* Toggle mark, update state, maybe confetti */
+  function toggleMark(cell, state) {
+    const { marks, rowDone, colDone } = state;
+    const idx = +cell.dataset.index;
+    marks[idx] = !marks[idx];
+    cell.classList.toggle("marked");
+  
+    const r = +cell.dataset.row;
+    const c = +cell.dataset.col;
+  
+    /* Row check */
+    if (!rowDone[r]) {
+      const rowCells = [...document.querySelectorAll(`.bingo-cell[data-row='${r}']`)];
+      if (rowCells.every((c) => c.classList.contains("marked"))) {
+        rowDone[r] = true;
+        celebrate();
+      }
+    }
+  
+    /* Column check */
+    if (!colDone[c]) {
+      const colCells = [...document.querySelectorAll(`.bingo-cell[data-col='${c}']`)];
+      if (colCells.every((c) => c.classList.contains("marked"))) {
+        colDone[c] = true;
+        celebrate();
+      }
+    }
+  
+    saveState(state);          // persist after every click
   }
-  window.newBingoCard = shuffleCard;
   
-  /* ------------------ Init ------------------ */
+  /* ------------------------------------------------- */
+  /*  Create a brand-new shuffled card                 */
+  /* ------------------------------------------------- */
+  function freshState() {
+    const shuffled = [...phrases].sort(() => Math.random() - 0.5).slice(0, CELLS);
+    return {
+      order: shuffled,
+      marks: Array(CELLS).fill(false),
+      rowDone: Array(ROWS).fill(false),
+      colDone: Array(COLS).fill(false)
+    };
+  }
+  
+  function shuffleCard() {
+    const newState = freshState();
+    saveState(newState);
+    build(newState);
+  }
+  window.newBingoCard = shuffleCard;     // still callable in console
+  
+  /* ------------------------------------------------- */
+  /*  Initialise                                       */
+  /* ------------------------------------------------- */
   (function init() {
-    build(loadOrder() || (() => {
-      const first = [...phrases].sort(() => Math.random() - 0.5).slice(0, 30);
-      saveOrder(first);
-      return first;
-    })());
+    const state = loadState() || freshState();
+    saveState(state);          // ensure schema is current
   
-    document.getElementById("refreshBtn")
-            .addEventListener("click", shuffleCard);
+    build(state);
+  
+    document
+      .getElementById("refreshBtn")
+      .addEventListener("click", shuffleCard);
   
     window.addEventListener("resize", () =>
       document.querySelectorAll(".bingo-cell").forEach(fitText)
