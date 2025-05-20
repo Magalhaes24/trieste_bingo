@@ -104,7 +104,7 @@ async function blastConfetti() {
 /* ------------------------------------------------- */
 /*  TEXT-FIT helper                                  */
 /* ------------------------------------------------- */
-function fitText(cell, { max = 18, min = 9 } = {}) {
+function fitText(cell, { max = 18, min = 8 } = {}) {
   let size = max;
   cell.style.fontSize = size + "px";
 
