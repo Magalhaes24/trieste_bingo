@@ -1,263 +1,165 @@
-/* =================================================== */
-/*                GLOBAL  PALETTE / SIZES              */
-/* =================================================== */
-:root {
-    /* colours */
-    --clr-bg:        #f0f2f8;
-    --clr-primary:   #ff5757;
-    --clr-primary-2: #ff7474;
-    --clr-white:     #ffffff;
-    --clr-grey:      #e1e5ee;
-  
-    /* radii & shadows */
-    --radius-lg: 12px;
-    --radius-md: 8px;
-    --shadow-card: 0 4px 18px rgba(0,0,0,.10);
-    --shadow-cell: 0 3px  8px rgba(0,0,0,.05);
-  
-    /* layout maths (desktop / large-mobile defaults) */
-    --gap: 7px;
-    --vertical-offset: 11rem;          /* header + button + gaps + padding */
-  
-    /* header-chip design */
-    --hdr-chip-size: clamp(2.4rem, 9vw, 3.6rem);
-    --hdr-chip-gap:  clamp(0.3rem, 1.5vw, 0.6rem);
-    --hdr-glow:      0 0 10px 3px rgba(255, 87, 87, .35);
+/*******************
+ *  COLOUR TOKENS
+ ******************/
+:root{
+  --sunset-1:#ff945a;
+  --sunset-2:#ffbd5d;
+  --sea-1:#015c8f;
+  --sea-2:#0478b7;
+  --marble:#f7f5f1;
+  --shadow:0 8px 26px rgba(0,0,0,.25);
+  --radius:20px;
+}
+
+/* RESET */
+*,*::before,*::after{box-sizing:border-box;margin:0;}
+
+/*******************
+ *  DEPTH BACKDROP
+ ******************/
+.flag-backdrop{
+  position:fixed;inset:0;overflow:hidden;z-index:-2;
+  perspective:900px;
+}
+.flag-backdrop img{
+  position:absolute;inset:-5vmax;
+  width:110%;height:110%;object-fit:cover;
+  transform-origin:center;
+  filter:contrast(.9) brightness(.8);
+  transition:transform .15s ease-out;
+}
+.flag-backdrop .glass{
+  position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(0,0,0,.35),rgba(0,0,0,.45));
+  backdrop-filter:blur(6px);
+}
+
+/*******************
+ *  FLOATING LANTERNS
+ ******************/
+.lantern-field{
+  position:fixed;inset:0;pointer-events:none;z-index:-1;
+  overflow:hidden;
+}
+.lantern{
+  position:absolute;left:50%;top:100%;
+  width:8px;height:12px;border-radius:2px;
+  background:rgba(255,200,120,.8);
+  box-shadow:0 0 12px 2px rgba(255,200,120,.5);
+  transform:translateX(-50%) scale(0);
+  animation:float 12s linear forwards;
+}
+@keyframes float{
+  0%  {transform:translateX(var(--startX)) translateY(10vh) scale(.2);opacity:0;}
+  5%  {opacity:1;}
+  100%{transform:translateX(var(--endX)) translateY(-110vh) scale(1);opacity:0;}
+}
+
+/*******************
+ *  HEADING & GRID
+ ******************/
+body{font-family:"Poppins",sans-serif;min-height:100vh;overflow-x:hidden;color:#fff;}
+
+.logo{
+  text-align:center;font-size:clamp(2.8rem,7vw,5rem);
+  font-weight:800;letter-spacing:3px;
+  margin:1.5rem 0 2.5rem;
+  filter:drop-shadow(0 4px 12px rgba(0,0,0,.5));
+}
+.logo .trieste{color:var(--marble)}
+.logo .it{color:var(--sunset-2)}
+
+.grid{
+  --min:240px;
+  display:grid;gap:2rem;
+  grid-template-columns:repeat(auto-fit,minmax(min(100%,var(--min)),1fr));
+  padding:0 6vw 6rem;
+}
+.tile{
+  position:relative;aspect-ratio:1/1;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:.6rem;text-decoration:none;color:#fff;
+  background:linear-gradient(145deg,var(--sunset-2),var(--sunset-1) 40%,var(--sea-2));
+  border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;
+  transition:transform .45s cubic-bezier(.25,1.25,.5,1.05);
+}
+body.glow .tile{box-shadow:0 0 20px 6px rgba(255,184,93,.5),var(--shadow);}
+.tile:hover{transform:translateY(-8px) rotateX(6deg) rotateY(-4deg)}
+.tile:active{transform:scale(.96)}
+.tile::before{
+  content:"";position:absolute;inset:0;opacity:0;
+  background:linear-gradient(60deg,rgba(255,255,255,.35),transparent 60%);
+  transition:opacity .4s ease,transform .8s ease;
+  transform:translateX(-120%);
+}
+.tile:hover::before{opacity:1;transform:translateX(120%)}
+.icon{font-size:clamp(2.6rem,8vw,3.5rem);text-shadow:0 3px 6px rgba(0,0,0,.3)}
+.tile h2{font-size:clamp(1.1rem,3.5vw,1.6rem);font-weight:600;}
+
+/* Ripple */
+.ripple{position:absolute;border-radius:50%;background:rgba(255,255,255,.45);
+  transform:scale(0);animation:ripple .7s ease-out forwards;pointer-events:none;}
+@keyframes ripple{to{transform:scale(1);opacity:0;}}
+
+/*******************
+ *  TRANSITION SWIPE
+ ******************/
+.transition{
+  position:fixed;inset:0;z-index:9999;
+  background:linear-gradient(180deg,var(--sea-1),var(--sea-2));
+  transform:translateY(100%);
+}
+body.leaving .transition{animation:swipe .7s cubic-bezier(.4,1,.6,1) forwards}
+@keyframes swipe{to{transform:translateY(0)}}
+
+/* ----------------  ICON DOCK  ---------------- */
+.dock{
+    position:fixed;
+    bottom:1rem;
+    left:50%;                 /* centred for every screen width */
+    transform:translateX(-50%);
+    display:flex;
+    gap:.9rem;
+    z-index:10001;
   }
   
-  /* =================================================== */
-  /*                    GLOBAL RESET                     */
-  /* =================================================== */
-  *,
-  *::before,
-  *::after { box-sizing: border-box; }
+  /* circular buttons */
+  .icon-btn{
+    /* size scales with viewport – min 46 px, tops out at 60 px */
+    width:clamp(46px,14vw,60px);
+    height:clamp(46px,14vw,60px);
+    display:flex; align-items:center; justify-content:center;
+    border:none; border-radius:50%;
+    background:rgba(0,0,0,.45);
+    backdrop-filter:blur(4px);
+    cursor:pointer;
+    transition:background .3s, transform .2s;
+  }
+  .icon-btn:hover   { background:rgba(0,0,0,.6); }
+  .icon-btn:active  { transform:scale(.94); }
   
-  body {
-    margin: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 100dvh;
-    padding: 1.2rem 0;                 /* safe-area breathing room */
-  
-    font-family: "Poppins", Arial, sans-serif;
-    background: var(--clr-bg);
-    text-align: center;
-    -webkit-font-smoothing: antialiased;
+  /* icons inside the buttons */
+  .icon-btn img{
+    width:70%; height:70%;
+    object-fit:contain;
+    pointer-events:none;        /* so taps hit the button, not the img */
   }
   
-  /* =================================================== */
-  /*                    CARD WRAPPER                     */
-  /* =================================================== */
-  .bingo-container {
-    /* width shrinks with viewport height if necessary so 6 rows always fit */
-    width: min(
-            95vw,
-            calc((100dvh - var(--vertical-offset)) * 5 / 6)
-          );
+  /* audio muted state – we’ll flip this class in JS */
+  .icon-btn.muted img{ opacity:.35; }
   
-    background: var(--clr-white);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-card);
-    padding: 1.3rem 1rem;
-  
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    overflow: hidden;
-  
-    animation: container-in .55s ease forwards;
-    opacity: 0;
-    transform: translateY(18px);
-  }
-  
-  /* =================================================== */
-  /*                “B  I  N  G  O”  HEADER              */
-  /* =================================================== */
-  .bingo-header {
-    margin: 0;
-    display: flex;
-    justify-content: space-between;
-    gap: var(--hdr-chip-gap);
-  
-    background: var(--clr-white);      /* bar itself now white */
-    padding: .45em var(--hdr-chip-gap);
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-card), var(--hdr-glow);
-    position: relative;
-    overflow: hidden;
-  
-    font-size: 0;                      /* suppress baseline gaps */
-  }
-  
-  .bingo-header::before,
-  .bingo-header::after {
-    content: "";
-    flex: 1 0 var(--hdr-chip-gap);     /* rounded ends via spacers */
-  }
-  
-  /* ------------- chip / individual letter ------------- */
-  .bingo-header span {
-    position: relative;
-    display: grid;
-    place-items: center;
-  
-    width:  var(--hdr-chip-size);
-    height: var(--hdr-chip-size);
-    border-radius: 50%;
-    font-size: calc(var(--hdr-chip-size) * 0.55);
-    font-weight: 700;
-    line-height: 1;
-    color: #fff;
-    text-shadow: 0 2px 4px rgba(0,0,0,.3);
-  
-    background: conic-gradient(
-      from 0deg,
-      #ff5757 0% 20%, #ffb657 20% 40%,
-      #ffe657 40% 60%, #57ffa2 60% 80%,
-      #57a8ff 80% 100%
-    );
-    background-size: 200% 200%;
-    animation: swirl 6s linear infinite;
-  
-    box-shadow:
-        inset 0 0 0 2px rgba(255,255,255,.45),
-        inset 0 4px 8px rgba(0,0,0,.15),
-        0 0 6px rgba(0,0,0,.12);
-  
-    opacity: 0;
-    transform: translateY(-120%) scale(.6);
-    animation: chip-drop .65s cubic-bezier(.22,1.38,.43,1.06) forwards;
-  }
-  
-  .bingo-header span:nth-child(1){ animation-delay: .15s; }
-  .bingo-header span:nth-child(2){ animation-delay: .25s; }
-  .bingo-header span:nth-child(3){ animation-delay: .35s; }
-  .bingo-header span:nth-child(4){ animation-delay: .45s; }
-  .bingo-header span:nth-child(5){ animation-delay: .55s; }
-  
-  /* =================================================== */
-  /*                        GRID                         */
-  /* =================================================== */
-  .bingo-card {
-    flex-grow: 1;
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: var(--gap);
-  }
-  
-  /* =================================================== */
-  /*                     SQUARES / CELLS                 */
-  /* =================================================== */
-  .bingo-cell {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  
-    aspect-ratio: 1 / 1;                   /* fixed square */
-    padding: 6px;
-    border: 2px solid var(--clr-grey);
-    border-radius: var(--radius-md);
-    background: var(--clr-white);
-    box-shadow: var(--shadow-cell);
-  
-    cursor: pointer;
-    user-select: none;
-    overflow: hidden;
-  
-    font-weight: 600;
-    font-size: 16px;                       /* shrinks via JS */
-    line-height: 1.25;
-    word-break: break-word;
-  
-    opacity: 0;
-    transform: scale(.85);
-    animation: cell-in .45s ease forwards;
-  }
-  
-  @media (hover: hover) {
-    .bingo-cell:hover  { background: #fafbff; transform: scale(.97); }
-  }
-  .bingo-cell:active   { transform: scale(.93); }
-  
-  .bingo-cell.marked {
-    border-color: var(--clr-primary);
-  }
-  .bingo-cell.marked::after {
-    content: "✖";
-    position: absolute;
+
+/*******************
+ *  Media tweaks
+ ******************/
+@media(max-width:500px){
+  .dock{flex-direction:row;left:50%;transform:translateX(-50%);}
+}
+
+/* Fireworks layer */
+canvas.layer {
+    position: fixed;
     inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: clamp(2.8rem, 6vw, 4.8rem);
-    font-weight: 700;
-    color: var(--clr-primary);
-    animation: pop .3s ease;
     pointer-events: none;
-  }
-  
-  /* =================================================== */
-  /*                  REFRESH BUTTON                     */
-  /* =================================================== */
-  .refresh-btn {
-    align-self: center;
-    font: 600 .95rem/1 "Poppins", sans-serif;
-    color: #fff;
-    background: var(--clr-primary);
-    padding: .55rem 1.1rem;
-    border: none;
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-card);
-    cursor: pointer;
-    transition: transform .15s ease, background .25s ease;
-  }
-  .refresh-btn:hover        { background: var(--clr-primary-2); transform: scale(1.04); }
-  .refresh-btn:active       { transform: scale(.96); }
-  .refresh-btn:focus-visible{ outline: 3px solid var(--clr-primary-2); outline-offset: 2px; }
-  
-  /* =================================================== */
-  /*                      KEYFRAMES                      */
-  /* =================================================== */
-  @keyframes container-in { to { opacity: 1; transform: translateY(0); } }
-  
-  @keyframes cell-in      { to { opacity: 1; transform: scale(1); } }
-  
-  @keyframes pop {
-    0%   { transform: scale(.4) rotate(6deg); opacity: 0; }
-    100% { transform: scale(1) rotate(6deg); opacity: 1; }
-  }
-  
-  @keyframes chip-drop {
-    60%  { transform: translateY(10%)  scale(1.08); opacity: 1; }
-    100% { transform: translateY(0)    scale(1);    opacity: 1; }
-  }
-  
-  @keyframes swirl { to { background-position: 200% 0; } }
-  
-  /* =================================================== */
-  /*                MOBILE-SPECIFIC TWEAKS               */
-  /* =================================================== */
-  @media (max-width: 480px) {
-    :root {
-      /* tighter everything for small screens */
-      --hdr-chip-size: clamp(2rem, 10vw, 2.8rem);
-      --hdr-chip-gap: 0.25rem;
-      --gap: 5px;
-      --vertical-offset: 9.5rem;
-    }
-  
-    .bingo-container {
-      padding: 1rem 0.6rem;
-      gap: 0.8rem;
-    }
-  
-    .refresh-btn {
-      font-size: 0.85rem;
-      padding: 0.5rem 0.9rem;
-    }
-  
-    .bingo-cell { padding: 4px; }
+    z-index: 10000;   /* above everything except the exit swipe */
   }
   
